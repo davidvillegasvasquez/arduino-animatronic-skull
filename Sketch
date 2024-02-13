@@ -1,0 +1,66 @@
+#include <Servo.h>
+
+Servo servo[3];
+boolean cont = true;
+int nang1 = 90;
+int nang2 = 90; 
+int nang0 = 80;
+
+void setup() {
+    servo[0].attach(0);
+    servo[1].attach(1);
+    servo[2].attach(2);
+    servo[1].write(180);
+    servo[2].write(180);
+    servo[0].write(110);
+    pinMode(3, INPUT_PULLUP);
+    randomSeed(analogRead(A0));
+}
+
+void loop() {
+  if(suiche()){
+    if(!servo[1].attached()) {
+        servo[1].attach(1);
+        servo[2].attach(2);
+        servo[0].attach(0);} 
+    servo[1].write(ang(servo[1], &nang1, 0, 180));
+    servo[2].write(ang(servo[2], &nang2, 0, 180));
+    servo[0].write(ang(servo[0], &nang0, 50, 110));
+    delay(15);}
+  else
+    if(cont){
+      estacionar(servo[1], 180);
+      estacionar(servo[2], 180);
+      estacionar(servo[0], 110);
+      cont = false;} 
+}
+  
+--------Sub-routines------------:
+
+boolean suiche(){
+    boolean est;
+    if(digitalRead(3) == LOW){
+        est = true;
+        cont = true;
+    }
+    else est = false;
+    return est;
+}
+
+void estacionar(Servo servo, byte angFin){
+    for(byte i= servo.read(); i <= angFin; i++){
+        servo.write(i);
+        delay(15);} 
+    servo.detach();        
+}
+
+int ang(Servo servo, int *nang, byte angMen, byte angMay){
+    int angu = servo.read();
+    int dang = *nang - angu;
+    if(dang >= 0) {
+        if(dang == 0) *nang=random(angMen ,angMay);
+        else ++angu;}
+    else
+        --angu;
+    return angu;     
+}
